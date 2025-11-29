@@ -18,6 +18,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
@@ -29,7 +30,13 @@
                        Placeholder="Last name"
                        Text="{Binding LastName}" />
 
-                <Button Grid.Column="2"
+                <DatePicker Grid.Column="2"
+                            Date="{Binding DateOfBirthDisplay, Mode=TwoWay}"
+                            MaximumDate="{Binding MaximumDate}"
+                            Format="MMM dd, yyyy"
+                            MinimumDate="01/01/1900" />
+
+                <Button Grid.Column="3"
                         Text="{Binding SaveButtonText}"
                         Command="{Binding AddPersonCommand}" />
             </Grid>
@@ -62,10 +69,24 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
 
-                            <!-- Uses Person.ToString() (FirstName + LastName) -->
-                            <Label Grid.Column="0"
-                                   Text="{Binding}"
-                                   FontSize="18" />
+                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                <!-- Name -->
+                                <Label Text="{Binding}"
+                                       FontSize="18"
+                                       FontAttributes="Bold" />
+                                <!-- Date of Birth -->
+                                <Label Text="{Binding DateOfBirth, StringFormat='DOB: {0:MMMM dd, yyyy}'}"
+                                       FontSize="14"
+                                       TextColor="Gray">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" 
+                                                     Binding="{Binding DateOfBirth}" 
+                                                     Value="{x:Null}">
+                                            <Setter Property="Text" Value="" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </VerticalStackLayout>
 
                             <Button Grid.Column="1"
                                     Text="Delete"

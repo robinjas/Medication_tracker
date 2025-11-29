@@ -31,6 +31,11 @@ public class PeopleViewModel : INotifyPropertyChanged
                 {
                     FirstName = value.FirstName;
                     LastName = value.LastName;
+                    DateOfBirth = value.DateOfBirth; // Can be null
+                }
+                else
+                {
+                    DateOfBirth = null; // Reset to null when clearing
                 }
 
                 OnPropertyChanged(nameof(SaveButtonText));
@@ -66,6 +71,31 @@ public class PeopleViewModel : INotifyPropertyChanged
             }
         }
     }
+
+    private DateTime? _dateOfBirth = null;
+    public DateTime? DateOfBirth
+    {
+        get => _dateOfBirth;
+        set
+        {
+            if (SetProperty(ref _dateOfBirth, value))
+            {
+                OnPropertyChanged(nameof(DateOfBirthDisplay));
+            }
+        }
+    }
+
+    // Display property for DatePicker (needs non-nullable DateTime)
+    public DateTime DateOfBirthDisplay
+    {
+        get => _dateOfBirth ?? DateTime.Today.AddYears(-30);
+        set
+        {
+            DateOfBirth = value;
+        }
+    }
+
+    public DateTime MaximumDate => DateTime.Today;
 
     private string _searchText = string.Empty;
     public string SearchText
@@ -160,7 +190,8 @@ public class PeopleViewModel : INotifyPropertyChanged
             var person = new Person
             {
                 FirstName = FirstName,
-                LastName = LastName
+                LastName = LastName,
+                DateOfBirth = DateOfBirth
             };
             await _database.SavePersonAsync(person);
         }
@@ -168,11 +199,13 @@ public class PeopleViewModel : INotifyPropertyChanged
         {
             SelectedPerson.FirstName = FirstName;
             SelectedPerson.LastName = LastName;
+            SelectedPerson.DateOfBirth = DateOfBirth;
             await _database.SavePersonAsync(SelectedPerson);
         }
 
         FirstName = string.Empty;
         LastName = string.Empty;
+        DateOfBirth = null; // Reset to null
         SelectedPerson = null;
         OnPropertyChanged(nameof(SaveButtonText));
 
@@ -194,6 +227,7 @@ public class PeopleViewModel : INotifyPropertyChanged
             SelectedPerson = null;
             FirstName = string.Empty;
             LastName = string.Empty;
+            DateOfBirth = null; // Reset to null
             OnPropertyChanged(nameof(SaveButtonText));
         }
     }
