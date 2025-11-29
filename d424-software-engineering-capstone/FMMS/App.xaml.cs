@@ -4,21 +4,23 @@ namespace FMMS;
 
 /// <summary>
 /// The main application class.
-/// Uses CreateWindow to create a TabbedPage with MainPage (Dashboard), PeoplePage, and MedicationsPage.
+/// Uses CreateWindow to create a TabbedPage with MainPage (Dashboard), PeoplePage, and MedicationsListPage.
 /// </summary>
 public partial class App : Application
 {
     private readonly MainPage _mainPage;
     private readonly PeoplePage _peoplePage;
-    private readonly MedicationsPage _medicationsPage;
+    private readonly MedicationsListPage _medicationsListPage;
+    private readonly ReportsPage _reportsPage;
 
-    public App(MainPage mainPage, PeoplePage peoplePage, MedicationsPage medicationsPage)
+    public App(MainPage mainPage, PeoplePage peoplePage, MedicationsListPage medicationsListPage, ReportsPage reportsPage)
     {
         InitializeComponent();
 
         _mainPage = mainPage ?? throw new ArgumentNullException(nameof(mainPage));
         _peoplePage = peoplePage ?? throw new ArgumentNullException(nameof(peoplePage));
-        _medicationsPage = medicationsPage ?? throw new ArgumentNullException(nameof(medicationsPage));
+        _medicationsListPage = medicationsListPage ?? throw new ArgumentNullException(nameof(medicationsListPage));
+        _reportsPage = reportsPage ?? throw new ArgumentNullException(nameof(reportsPage));
     }
 
     protected override Window CreateWindow(IActivationState? activationState)
@@ -39,10 +41,16 @@ public partial class App : Application
             IconImageSource = "people.png"
         });
 
-        tabbedPage.Children.Add(new NavigationPage(_medicationsPage)
+        tabbedPage.Children.Add(new NavigationPage(_medicationsListPage)
         {
             Title = "Medications",
             IconImageSource = "pill.png"
+        });
+
+        tabbedPage.Children.Add(new NavigationPage(_reportsPage)
+        {
+            Title = "Reports",
+            IconImageSource = "report.png"
         });
 
         // Style the tabbed page

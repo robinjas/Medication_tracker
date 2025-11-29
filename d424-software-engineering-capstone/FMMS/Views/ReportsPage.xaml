@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="FMMS.Views.ReportsPage"
+             x:Name="RootPage"
+             Title="Reports">
+    <ContentPage.Content>
+        <ScrollView>
+            <VerticalStackLayout Padding="16" Spacing="16">
+                
+                <!-- Title -->
+                <Label Text="Reports"
+                       FontSize="28"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center" />
+
+                <!-- Description -->
+                <Label Text="Generate a comprehensive summary report with all medications and family members. Reports are saved as CSV files."
+                       FontSize="14"
+                       TextColor="Gray"
+                       HorizontalOptions="Center"
+                       HorizontalTextAlignment="Center"
+                       Margin="0,0,0,16" />
+
+                <!-- Report Generation Button -->
+                <Button Text="Generate Summary Report"
+                        Command="{Binding GenerateReportCommand}"
+                        BackgroundColor="#4A90E2"
+                        TextColor="White"
+                        FontSize="16"
+                        Padding="20,12"
+                        CornerRadius="8" />
+
+                <!-- Loading Indicator -->
+                <ActivityIndicator IsRunning="{Binding IsBusy}"
+                                   IsVisible="{Binding IsBusy}"
+                                   Color="#4A90E2"
+                                   Margin="0,16" />
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </ContentPage.Content>
+</ContentPage>
+

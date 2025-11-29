@@ -43,17 +43,5 @@ public partial class MainPage : ContentPage
             viewModel.LoadCommand.Execute(null);
         }
     }
-
-    private void OnSearchTextChanged(object sender, TextChangedEventArgs e)
-    {
-        // Auto-search as user types (with debounce in real app)
-        if (BindingContext is MainViewModel viewModel)
-        {
-            if (string.IsNullOrWhiteSpace(e.NewTextValue))
-            {
-                viewModel.SearchResults.Clear();
-            }
-        }
-    }
 }
 

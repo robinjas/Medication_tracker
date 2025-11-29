@@ -30,6 +30,13 @@ public class Medication : BaseEntity
     [Ignore]
     public Person? Person { get; set; }
 
+    /// <summary>
+    /// Formatted schedule times for display (e.g., "8:00 AM, 2:00 PM").
+    /// Not persisted to database (marked with [Ignore])
+    /// </summary>
+    [Ignore]
+    public string ScheduleTimesDisplay { get; set; } = string.Empty;
+
     public string Name
     {
         get => _name;

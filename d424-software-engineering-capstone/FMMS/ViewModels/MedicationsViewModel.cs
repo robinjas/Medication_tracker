@@ -238,6 +238,7 @@ public class MedicationsViewModel : INotifyPropertyChanged
     public ICommand RemoveScheduleTimeCommand { get; }
 
     public event PropertyChangedEventHandler? PropertyChanged;
+    public event EventHandler? MedicationSaved;
 
     public MedicationsViewModel(DatabaseService database, MedicationActionService medicationActionService, NotificationService? notificationService = null)
     {
@@ -272,8 +273,22 @@ public class MedicationsViewModel : INotifyPropertyChanged
             Medications.Clear();
 
             var medications = await _database.GetMedicationsAsync();
+            
+            // Load people if not already loaded to map Person navigation property
+            if (People.Count == 0)
+            {
+                var people = await _database.GetPeopleAsync();
+                foreach (var person in people)
+                {
+                    People.Add(person);
+                }
+            }
+            
+            // Map Person navigation property and load schedule times for each medication
             foreach (var medication in medications)
             {
+                medication.Person = People.FirstOrDefault(p => p.Id == medication.PersonId);
+                await LoadScheduleTimesForMedication(medication);
                 Medications.Add(medication);
             }
         }
@@ -310,8 +325,22 @@ public class MedicationsViewModel : INotifyPropertyChanged
             Medications.Clear();
 
             var medications = await _database.GetMedicationsAsync(personId);
+            
+            // Load people if not already loaded to map Person navigation property
+            if (People.Count == 0)
+            {
+                var people = await _database.GetPeopleAsync();
+                foreach (var person in people)
+                {
+                    People.Add(person);
+                }
+            }
+            
+            // Map Person navigation property and load schedule times for each medication
             foreach (var medication in medications)
             {
+                medication.Person = People.FirstOrDefault(p => p.Id == medication.PersonId);
+                await LoadScheduleTimesForMedication(medication);
                 Medications.Add(medication);
             }
         }
@@ -330,8 +359,22 @@ public class MedicationsViewModel : INotifyPropertyChanged
 
             var personId = SelectedPerson?.Id;
             var results = await _database.SearchMedicationsAsync(SearchText, personId);
+            
+            // Load people if not already loaded to map Person navigation property
+            if (People.Count == 0)
+            {
+                var people = await _database.GetPeopleAsync();
+                foreach (var person in people)
+                {
+                    People.Add(person);
+                }
+            }
+            
+            // Map Person navigation property and load schedule times for each medication
             foreach (var medication in results)
             {
+                medication.Person = People.FirstOrDefault(p => p.Id == medication.PersonId);
+                await LoadScheduleTimesForMedication(medication);
                 Medications.Add(medication);
             }
         }
@@ -496,6 +539,9 @@ public class MedicationsViewModel : INotifyPropertyChanged
                 "Success",
                 "Medication saved successfully!",
                 "OK");
+            
+            // Fire event to notify that medication was saved
+            MedicationSaved?.Invoke(this, EventArgs.Empty);
         }
         catch (Exception ex)
         {
@@ -616,8 +662,22 @@ public class MedicationsViewModel : INotifyPropertyChanged
 
             var personId = SelectedPerson?.Id;
             var lowSupply = await _database.GetLowSupplyMedicationsAsync(personId);
+            
+            // Load people if not already loaded to map Person navigation property
+            if (People.Count == 0)
+            {
+                var people = await _database.GetPeopleAsync();
+                foreach (var person in people)
+                {
+                    People.Add(person);
+                }
+            }
+            
+            // Map Person navigation property and load schedule times for each medication
             foreach (var medication in lowSupply)
             {
+                medication.Person = People.FirstOrDefault(p => p.Id == medication.PersonId);
+                await LoadScheduleTimesForMedication(medication);
                 Medications.Add(medication);
             }
         }
@@ -636,8 +696,22 @@ public class MedicationsViewModel : INotifyPropertyChanged
 
             var personId = SelectedPerson?.Id;
             var expired = await _database.GetExpiredMedicationsAsync(personId);
+            
+            // Load people if not already loaded to map Person navigation property
+            if (People.Count == 0)
+            {
+                var people = await _database.GetPeopleAsync();
+                foreach (var person in people)
+                {
+                    People.Add(person);
+                }
+            }
+            
+            // Map Person navigation property and load schedule times for each medication
             foreach (var medication in expired)
             {
+                medication.Person = People.FirstOrDefault(p => p.Id == medication.PersonId);
+                await LoadScheduleTimesForMedication(medication);
                 Medications.Add(medication);
             }
         }
@@ -675,6 +749,30 @@ public class MedicationsViewModel : INotifyPropertyChanged
             // If schedule loading fails, just start with empty list
             System.Diagnostics.Debug.WriteLine($"Error loading schedule times: {ex.Message}");
             ScheduleTimes.Clear();
+        }
+    }
+
+    private async Task LoadScheduleTimesForMedication(Medication medication)
+    {
+        try
+        {
+            var schedules = await _database.GetSchedulesForMedicationAsync(medication.Id);
+            var dailySchedule = schedules.OfType<DailySchedule>().FirstOrDefault();
+            
+            if (dailySchedule != null && !string.IsNullOrWhiteSpace(dailySchedule.TimesOfDay))
+            {
+                // Use the GetScheduleDescription method which formats times nicely
+                medication.ScheduleTimesDisplay = dailySchedule.GetScheduleDescription();
+            }
+            else
+            {
+                medication.ScheduleTimesDisplay = string.Empty;
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error loading schedule times for medication {medication.Id}: {ex.Message}");
+            medication.ScheduleTimesDisplay = string.Empty;
         }
     }
 
@@ -760,7 +858,7 @@ public class MedicationsViewModel : INotifyPropertyChanged
         }
     }
 
-    private void ClearForm()
+    public void ClearForm()
     {
         Name = string.Empty;
         Dosage = string.Empty;

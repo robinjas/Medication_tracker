@@ -50,11 +50,16 @@ public static class MauiProgram
                 sp.GetRequiredService<DatabaseService>(),
                 sp.GetRequiredService<MedicationActionService>(),
                 sp.GetService<NotificationService>()));
+        builder.Services.AddTransient<ReportsViewModel>(sp =>
+            new ReportsViewModel(
+                sp.GetRequiredService<ReportService>()));
 
         // Pages (Transient)
         builder.Services.AddTransient<MainPage>();
         builder.Services.AddTransient<PeoplePage>();
+        builder.Services.AddTransient<MedicationsListPage>();
         builder.Services.AddTransient<MedicationsPage>();
+        builder.Services.AddTransient<ReportsPage>();
 
         var app = builder.Build();
 

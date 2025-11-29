@@ -50,10 +50,6 @@
                         Command="{Binding SearchCommand}" />
             </Grid>
 
-            <!-- Generate report button -->
-            <Button Text="Generate Report"
-                    Command="{Binding GenerateReportCommand}" />
-
             <!-- People list -->
             <CollectionView ItemsSource="{Binding People}"
                             SelectionMode="Single"

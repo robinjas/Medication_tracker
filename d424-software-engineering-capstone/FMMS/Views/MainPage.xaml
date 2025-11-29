@@ -28,44 +28,6 @@
                            HorizontalOptions="Center" />
                 </VerticalStackLayout>
 
-                <!-- Search Bar -->
-                <Grid ColumnSpacing="8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-
-                    <Entry Grid.Column="0"
-                           Placeholder="Search people, medications..."
-                           Text="{Binding SearchText}"
-                           TextChanged="OnSearchTextChanged" />
-                    <Button Grid.Column="1"
-                            Text="Search"
-                            Command="{Binding SearchCommand}"
-                            BackgroundColor="#4A90E2"
-                            TextColor="White" />
-                </Grid>
-
-                <!-- Search Results -->
-                <CollectionView ItemsSource="{Binding SearchResults}"
-                                IsVisible="{Binding SearchResults.Count, Converter={StaticResource CountToVisibilityConverter}}"
-                                Margin="0,8">
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate>
-                            <Border StrokeThickness="1" Stroke="LightGray" Padding="12" Margin="0,4" StrokeShape="RoundRectangle 8">
-                                <VerticalStackLayout Spacing="4">
-                                    <Label Text="{Binding Title}" FontSize="16" FontAttributes="Bold" />
-                                    <Label Text="{Binding Subtitle}" FontSize="14" TextColor="Gray" />
-                                    <Label Text="{Binding Details}" FontSize="12" TextColor="DarkGray" />
-                                    <Label Text="{Binding EntityType, StringFormat='Type: {0}'}" 
-                                           FontSize="11" 
-                                           TextColor="Blue" />
-                                </VerticalStackLayout>
-                            </Border>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
-
                 <!-- Statistics Cards -->
                 <Label Text="Statistics" FontSize="20" FontAttributes="Bold" Margin="0,8,0,0" />
                 
@@ -154,27 +116,6 @@
                             </VerticalStackLayout>
                         </Border.Content>
                     </Border>
-                </Grid>
-
-                <!-- Action Buttons -->
-                <Grid ColumnSpacing="8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-
-                    <Button Grid.Column="0"
-                            Text="People"
-                            Command="{Binding NavigateToPeopleCommand}"
-                            BackgroundColor="#6C757D"
-                            TextColor="White"
-                            CornerRadius="8" />
-                    <Button Grid.Column="1"
-                            Text="Medications"
-                            Command="{Binding NavigateToMedicationsCommand}"
-                            BackgroundColor="#4A90E2"
-                            TextColor="White"
-                            CornerRadius="8" />
                 </Grid>
 
                 <!-- Low Supply Medications -->
@@ -356,14 +297,6 @@
                            HorizontalOptions="Center"
                            Margin="0,8" />
                 </VerticalStackLayout>
-
-                <!-- Report Generation -->
-                <Button Text="Generate Summary Report"
-                        Command="{Binding GenerateReportCommand}"
-                        BackgroundColor="#17A2B8"
-                        TextColor="White"
-                        CornerRadius="8"
-                        Margin="0,16,0,0" />
 
                 <!-- Refresh Button -->
                 <Button Text="Refresh"

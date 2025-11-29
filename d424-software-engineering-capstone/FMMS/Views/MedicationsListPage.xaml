@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="FMMS.Views.MedicationsListPage"
+             x:Name="RootPage"
+             Title="Medications">
+    <ContentPage.Content>
+        <ScrollView>
+            <VerticalStackLayout Padding="16" Spacing="12">
+
+                <!-- Title with red dot indicator -->
+                <HorizontalStackLayout Spacing="8" VerticalOptions="Center" Margin="0,0,0,8">
+                    <BoxView WidthRequest="8" 
+                            HeightRequest="8" 
+                            BackgroundColor="#DC3545" 
+                            VerticalOptions="Center"
+                            CornerRadius="4" />
+                    <Label Text="Medications List" 
+                           FontSize="24" 
+                           FontAttributes="Bold" 
+                           VerticalOptions="Center" />
+                </HorizontalStackLayout>
+
+                <!-- Person Filter -->
+                <Label Text="Filter by Family Member:" FontSize="14" FontAttributes="Bold" />
+                <Picker ItemsSource="{Binding People}"
+                        SelectedItem="{Binding SelectedPerson}"
+                        ItemDisplayBinding="{Binding .}"
+                        Title="All People"
+                        BackgroundColor="LightGray" />
+
+                <!-- Search Bar -->
+                <Grid ColumnSpacing="8" Margin="0,8,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Entry Grid.Column="0"
+                           Placeholder="Search medications..."
+                           Text="{Binding SearchText}" />
+                    <Button Grid.Column="1"
+                            Text="Search"
+                            Command="{Binding SearchCommand}"
+                            BackgroundColor="#4A90E2"
+                            TextColor="White" />
+                </Grid>
+
+                <!-- Filter Buttons -->
+                <Grid ColumnSpacing="8" Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0"
+                            Text="Show All"
+                            Command="{Binding ShowAllCommand}"
+                            BackgroundColor="#6C757D"
+                            TextColor="White"
+                            FontSize="12" />
+                    <Button Grid.Column="1"
+                            Text="Low Supply"
+                            Command="{Binding ShowLowSupplyCommand}"
+                            BackgroundColor="#FFC107"
+                            TextColor="Black"
+                            FontSize="12" />
+                </Grid>
+
+                <!-- Add New Medication Button -->
+                <Button Text="Add New Medication"
+                        Clicked="OnAddNewMedicationClicked"
+                        BackgroundColor="#28A745"
+                        TextColor="White"
+                        FontSize="14"
+                        Padding="16,10"
+                        CornerRadius="4"
+                        HorizontalOptions="Start"
+                        Margin="0,0,0,8" />
+
+                <!-- Table Header -->
+                <Border StrokeThickness="1" 
+                        Stroke="#E0E0E0" 
+                        BackgroundColor="#F5F5F5"
+                        Padding="12,10"
+                        StrokeShape="Rectangle">
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="1.5*" />
+                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="2*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Label Grid.Column="0" 
+                               Text="Name" 
+                               FontSize="14" 
+                               FontAttributes="Bold" 
+                               TextColor="Black" />
+                        <Label Grid.Column="1" 
+                               Text="Dosage" 
+                               FontSize="14" 
+                               FontAttributes="Bold" 
+                               TextColor="Black" />
+                        <Label Grid.Column="2" 
+                               Text="Person" 
+                               FontSize="14" 
+                               FontAttributes="Bold" 
+                               TextColor="Black" />
+                        <Label Grid.Column="3" 
+                               Text="Schedule Times" 
+                               FontSize="14" 
+                               FontAttributes="Bold" 
+                               TextColor="Black" />
+                        <Label Grid.Column="4" 
+                               Text="Actions" 
+                               FontSize="14" 
+                               FontAttributes="Bold" 
+                               TextColor="Black" />
+                    </Grid>
+                </Border>
+
+                <!-- Table Rows -->
+                <CollectionView ItemsSource="{Binding Medications}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Border StrokeThickness="0" 
+                                   Stroke="#E0E0E0" 
+                                   BackgroundColor="White"
+                                   Padding="12,10"
+                                   Margin="0,0,0,1">
+                                <Grid ColumnSpacing="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="2*" />
+                                        <ColumnDefinition Width="1.5*" />
+                                        <ColumnDefinition Width="2*" />
+                                        <ColumnDefinition Width="2*" />
+                                        <ColumnDefinition Width="2*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Name -->
+                                    <Label Grid.Column="0" 
+                                           Text="{Binding Name}" 
+                                           FontSize="14" 
+                                           TextColor="Black"
+                                           VerticalOptions="Center" />
+
+                                    <!-- Dosage -->
+                                    <Label Grid.Column="1" 
+                                           Text="{Binding Dosage}" 
+                                           FontSize="14" 
+                                           TextColor="Black"
+                                           VerticalOptions="Center" />
+
+                                    <!-- Person -->
+                                    <Label Grid.Column="2" 
+                                           Text="{Binding Person, StringFormat='{0}'}" 
+                                           FontSize="14" 
+                                           TextColor="Black"
+                                           VerticalOptions="Center">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label" 
+                                                         Binding="{Binding Person}" 
+                                                         Value="{x:Null}">
+                                                <Setter Property="Text" Value="" />
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
+
+                                    <!-- Schedule Times -->
+                                    <Label Grid.Column="3" 
+                                           Text="{Binding ScheduleTimesDisplay}" 
+                                           FontSize="12" 
+                                           TextColor="DarkGray"
+                                           VerticalOptions="Center" />
+
+                                    <!-- Actions -->
+                                    <HorizontalStackLayout Grid.Column="4" 
+                                                          Spacing="8" 
+                                                          VerticalOptions="Center"
+                                                          HorizontalOptions="Start">
+                                        <Button Text="Edit"
+                                                Clicked="OnEditButtonClicked"
+                                                BackgroundColor="#FFC107"
+                                                TextColor="Black"
+                                                FontSize="12"
+                                                Padding="12,6"
+                                                CornerRadius="4" />
+                                        <Button Text="Delete"
+                                                Command="{Binding BindingContext.DeleteCommand, Source={x:Reference RootPage}}"
+                                                CommandParameter="{Binding .}"
+                                                BackgroundColor="#DC3545"
+                                                TextColor="White"
+                                                FontSize="12"
+                                                Padding="12,6"
+                                                CornerRadius="4" />
+                                    </HorizontalStackLayout>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </ContentPage.Content>
+</ContentPage>
+
