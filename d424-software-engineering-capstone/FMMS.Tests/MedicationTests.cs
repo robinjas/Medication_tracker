@@ -437,14 +437,15 @@ public class MedicationTests
     }
 
     [Fact]
-    public void Medication_IsSupplyLow_ReturnsFalse_WhenOutOfStock()
+    public void Medication_IsSupplyLow_ReturnsFalse_WhenOutOfStock_NoRefills()
     {
         // Arrange
         var medication = new Medication
         {
             Name = "Aspirin",
             CurrentSupply = 0,
-            LowSupplyThreshold = 10
+            LowSupplyThreshold = 10,
+            RefillsRemaining = 0 // No refills remaining
         };
 
         // Act
@@ -452,6 +453,25 @@ public class MedicationTests
 
         // Assert
         Assert.False(result);
+    }
+
+    [Fact]
+    public void Medication_IsSupplyLow_ReturnsTrue_WhenOutOfStock_WithRefills()
+    {
+        // Arrange
+        var medication = new Medication
+        {
+            Name = "Aspirin",
+            CurrentSupply = 0,
+            LowSupplyThreshold = 10,
+            RefillsRemaining = 3 // Has refills remaining
+        };
+
+        // Act
+        var result = medication.IsSupplyLow();
+
+        // Assert
+        Assert.True(result); // Should show in low supply list so user can refill
     }
 
     [Fact]

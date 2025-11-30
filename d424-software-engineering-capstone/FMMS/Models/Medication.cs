@@ -91,7 +91,7 @@ public class Medication : BaseEntity
     }
 
     public bool IsSupplyLow()
-        => CurrentSupply <= LowSupplyThreshold && CurrentSupply > 0;
+        => (CurrentSupply <= LowSupplyThreshold && CurrentSupply > 0) || (CurrentSupply <= 0 && RefillsRemaining > 0);
 
     public bool IsOutOfStock()
         => CurrentSupply <= 0;
