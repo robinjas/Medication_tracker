@@ -77,14 +77,25 @@ public class IntervalSchedule : ScheduleRule
             return false;
         }
 
-        var nextDose = CalculateNextDose(checkTime);
-        if (!nextDose.HasValue)
+        if (IntervalAmount <= 0)
         {
             return false;
         }
 
-        // Consider due if within 30 minutes of scheduled time
-        var timeDifference = Math.Abs((checkTime - nextDose.Value).TotalMinutes);
+        // Calculate the previous scheduled dose time
+        var scheduledDose = StartTime;
+        var timeSpan = IntervalUnit.Equals("Hours", StringComparison.OrdinalIgnoreCase)
+            ? TimeSpan.FromHours(IntervalAmount)
+            : TimeSpan.FromDays(IntervalAmount);
+
+        // Find the most recent scheduled dose time before or at checkTime
+        while (scheduledDose + timeSpan <= checkTime)
+        {
+            scheduledDose = scheduledDose + timeSpan;
+        }
+
+        // Consider due if within 30 minutes before or after the scheduled time
+        var timeDifference = Math.Abs((checkTime - scheduledDose).TotalMinutes);
         return timeDifference <= 30;
     }
 

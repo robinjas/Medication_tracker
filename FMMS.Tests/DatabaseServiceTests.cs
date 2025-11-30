@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FMMS.Models;
@@ -19,14 +20,28 @@ public class DatabaseServiceTests : IDisposable
 
     public DatabaseServiceTests()
     {
-        // Create a temporary in-memory database for testing
-        _testDbPath = ":memory:";
+        // Create a temporary file database for testing
+        // Using a temp file instead of :memory: to avoid issues with multiple connections
+        _testDbPath = Path.GetTempFileName();
         _databaseService = new DatabaseService(_testDbPath);
     }
 
     public void Dispose()
     {
-        // Cleanup if needed
+        // Cleanup: delete temp file
+        // Note: DatabaseService doesn't implement IDisposable, but SQLite connections
+        // are automatically closed when the connection object is garbage collected
+        if (File.Exists(_testDbPath))
+        {
+            try
+            {
+                File.Delete(_testDbPath);
+            }
+            catch
+            {
+                // Ignore errors during cleanup (file may be locked briefly)
+            }
+        }
     }
 
     [Fact]

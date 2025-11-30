@@ -352,9 +352,13 @@ public class ValidationHelperTests
         var result = ValidationHelper.SanitizeInput(input);
 
         // Assert
-        Assert.DoesNotContain("'", result);
+        // Apostrophes are kept for names like "O'Brien" - this is intentional
+        // SQL comment markers and keywords should be removed
         Assert.DoesNotContain("--", result);
         Assert.DoesNotContain("DROP", result, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain(";", result);
+        // Verify apostrophe is preserved (for legitimate names)
+        Assert.Contains("'", result);
     }
 
     [Fact]
