@@ -90,8 +90,13 @@ public class Medication : BaseEntity
         return CurrentSupply / dosesPerDay;
     }
 
+    /// <summary>
+    /// Returns true if medication supply is at or below the low supply threshold.
+    /// Includes medications with zero supply so they remain visible for user attention,
+    /// regardless of whether refills are available.
+    /// </summary>
     public bool IsSupplyLow()
-        => (CurrentSupply <= LowSupplyThreshold && CurrentSupply > 0) || (CurrentSupply <= 0 && RefillsRemaining > 0);
+        => CurrentSupply <= LowSupplyThreshold;
 
     public bool IsOutOfStock()
         => CurrentSupply <= 0;
