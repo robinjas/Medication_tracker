@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using FMMS.Helpers;
 using FMMS.Models;
 using Microsoft.Maui.Controls;
 
@@ -198,12 +199,6 @@ public class NotificationService : IDisposable
     {
         try
         {
-            var page = Application.Current?.Windows[0].Page;
-            if (page == null)
-            {
-                return;
-            }
-
             // Get the person's name if available
             var person = await _database.GetPersonByIdAsync(medication.PersonId);
             var personName = person != null ? $"{person.FirstName} {person.LastName}" : "Patient";
@@ -218,10 +213,9 @@ public class NotificationService : IDisposable
             // Show alert on the main thread
             await MainThread.InvokeOnMainThreadAsync(async () =>
             {
-                await page.DisplayAlert(
+                await DialogHelper.ShowAlertAsync(
                     "Medication Reminder",
-                    message,
-                    "OK");
+                    message);
             });
         }
         catch (Exception ex)

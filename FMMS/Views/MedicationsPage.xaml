@@ -19,7 +19,6 @@
                 <Picker ItemsSource="{Binding People}"
                         SelectedItem="{Binding SelectedPerson}"
                         ItemDisplayBinding="{Binding .}"
-                        Title="Choose person..."
                         BackgroundColor="LightGray" />
 
                 <!-- Medication Form -->

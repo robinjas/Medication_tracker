@@ -1,29 +1,120 @@
 <strong>**DO NOT DISTRIBUTE OR PUBLICLY POST SOLUTIONS TO THESE LABS. MAKE ALL FORKS OF THIS REPOSITORY WITH SOLUTION CODE PRIVATE. PLEASE REFER TO THE STUDENT CODE OF CONDUCT AND ETHICAL EXPECTATIONS FOR COLLEGE OF INFORMATION TECHNOLOGY STUDENTS FOR SPECIFICS. **</strong>
 
-# WESTERN GOVERNORS UNIVERSITY 
-## D424 – SOFTWARE ENGINEERING CAPSTONE
-Welcome to Software Engineering Capstone! This is an opportunity for students to develop full stack software engineering documentation and applications. They will execute documentation, unit testing, revision of software applications, and deploy software applications with scripts and containers on a cloud platform.
+# Family Medication Management System (FMMS)
 
-FOR SPECIFIC TASK INSTRUCTIONS AND REQUIREMENTS FOR THIS ASSESSMENT, PLEASE REFER TO THE COURSE PAGE.
-BASIC INSTRUCTIONS
-For this assessment, you will deploy your developed full stack software product to a web service of your choice.
+## WESTERN GOVERNORS UNIVERSITY 
+### D424 – SOFTWARE ENGINEERING CAPSTONE - Task 3
 
+A full-stack cross-platform application for managing family medications, schedules, and medication tracking built with .NET MAUI.
 
-## SUPPLEMENTAL RESOURCES  
-1.	How to clone a project to IntelliJ using Git?
+## Project Overview
 
-> Ensure that you have Git installed on your system and that IntelliJ is installed using [Toolbox](https://www.jetbrains.com/toolbox-app/). Make sure that you are using version 2022.3.2. Once this has been confirmed, click the clone button and use the 'IntelliJ IDEA (HTTPS)' button. This will open IntelliJ with a prompt to clone the proejct. Save it in a safe location for the directory and press clone. IntelliJ will prompt you for your credentials. Enter in your WGU Credentials and the project will be cloned onto your local machine.  
+The Family Medication Management System (FMMS) is a comprehensive medication management application that allows users to:
+- Manage family members and their medications
+- Create and manage medication schedules (Daily, Interval, Weekly, As-Needed)
+- Search across medications, people, and schedules
+- Generate comprehensive reports
+- Track medication supply levels and expiration dates
 
-2. How to create a branch and start Development?
+## Technology Stack
 
-- GitLab method
-> Press the '+' button located near your branch name. In the dropdown list, press the 'New branch' button. This will allow you to create a name for your branch. Once the branch has been named, you can select 'Create Branch' to push the branch to your repository.
+- **Framework:** .NET 9.0 MAUI (Multi-platform App UI)
+- **Database:** SQLite with SQLite-net ORM
+- **Testing:** xUnit
+- **Platforms:** Windows, Android, iOS, macOS
 
-- IntelliJ method
-> In IntelliJ, Go to the 'Git' button on the top toolbar. Select the new branch option and create a name for the branch. Make sure checkout branch is selected and press create. You can now add a commit message and push the new branch to the local repo.
+## Prerequisites
 
-## SUPPORT
-If you need additional support, please navigate to the course page and reach out to your course instructor.
+- .NET 9.0 SDK or later
+- Visual Studio 2022 (17.8 or later) with MAUI workload, OR
+- Visual Studio Code with .NET extensions
+- Git (for cloning the repository)
 
-## FUTURE USE
-Take this opportunity to create or add to a simple resume portfolio to highlight and showcase your work for future use in career search, experience, and education!
+## Getting Started
+
+### Clone the Repository
+
+```bash
+git clone <GitLab-Repository-URL>
+cd d424-software-engineering-capstone
+```
+
+### Build the Project
+
+```bash
+dotnet restore
+dotnet build
+```
+
+### Run the Application
+
+```bash
+cd FMMS
+dotnet run
+```
+
+Or open the solution in Visual Studio and run from the IDE.
+
+### Run Unit Tests
+
+```bash
+cd FMMS.Tests
+dotnet test
+```
+
+## Project Structure
+
+```
+FMMS/
+├── Models/          # Domain models (Person, Medication, ScheduleRule, etc.)
+├── Services/        # Business logic (DatabaseService, SearchService, etc.)
+├── ViewModels/      # MVVM ViewModels
+├── Views/           # MAUI XAML views
+├── Helpers/          # Utility classes (ValidationHelper, etc.)
+├── Reports/          # Report generation service
+└── Platforms/        # Platform-specific code
+
+FMMS.Tests/
+└── *.cs              # Unit test files
+```
+
+## Key Features
+
+- **Object-Oriented Design:** Inheritance, polymorphism, and encapsulation
+- **Search Functionality:** Multi-entity search with multiple row results
+- **Database Operations:** Secure CRUD operations with validation
+- **Report Generation:** CSV reports with multiple columns, rows, and timestamps
+- **Validation:** Comprehensive input validation
+- **Security:** Input sanitization, SQL injection prevention, soft deletes
+- **Scalable Architecture:** Service layer, dependency injection, async operations
+
+## Documentation
+
+For detailed documentation including:
+- Design documents with class and architecture diagrams
+- User guides (setup/maintenance and end-user)
+- Test plans and results
+- GitLab repository information
+
+Please refer to `task3.docx` in the repository root.
+
+## Testing
+
+The project includes comprehensive unit tests covering:
+- Inheritance and polymorphism (ScheduleRule hierarchy)
+- Database operations
+- Validation logic
+- Entity models
+
+Run tests with:
+```bash
+dotnet test
+```
+
+## License
+
+This project is part of the WGU Software Engineering Capstone course. See WGU Academic Authenticity policies.
+
+## Support
+
+For course-specific support, please navigate to the course page and reach out to your course instructor.

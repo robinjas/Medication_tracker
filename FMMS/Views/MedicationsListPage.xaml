@@ -26,7 +26,6 @@
                 <Picker ItemsSource="{Binding People}"
                         SelectedItem="{Binding SelectedPerson}"
                         ItemDisplayBinding="{Binding .}"
-                        Title="All People"
                         BackgroundColor="LightGray" />
 
                 <!-- Search Bar -->

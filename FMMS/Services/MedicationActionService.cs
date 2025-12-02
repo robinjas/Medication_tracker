@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
+using FMMS.Helpers;
 using FMMS.Models;
 using Microsoft.Maui.Controls;
 
@@ -24,7 +26,7 @@ public class MedicationActionService
         // If there are no refills remaining, block the refill and instruct the user
         if (medication.RefillsRemaining <= 0)
         {
-            await ShowAlertAsync(
+            await DialogHelper.ShowAlertAsync(
                 "No Refills Remaining",
                 $"{medication.Name} has no refills remaining on this prescription.\n\n" +
                 "Please contact the prescribing doctor or pharmacy to request additional refills " +
@@ -32,10 +34,10 @@ public class MedicationActionService
             return false;
         }
 
-        var page = Application.Current?.Windows[0].Page;
+        var page = Application.Current?.Windows?.FirstOrDefault()?.Page;
         if (page == null)
         {
-            await ShowAlertAsync("Error", "Unable to access the current page to record a refill.");
+            await DialogHelper.ShowAlertAsync("Error", "Unable to access the current page to record a refill.");
             return false;
         }
 
@@ -65,7 +67,7 @@ public class MedicationActionService
                 await onRefresh();
             }
 
-            await ShowAlertAsync(
+            await DialogHelper.ShowAlertAsync(
                 "Success",
                 $"Added {amount} doses to {medication.Name}. New supply: {medication.CurrentSupply}");
 
@@ -73,7 +75,7 @@ public class MedicationActionService
         }
         catch (Exception ex)
         {
-            await ShowAlertAsync("Error", $"Failed to record refill: {ex.Message}");
+            await DialogHelper.ShowAlertAsync("Error", $"Failed to record refill: {ex.Message}");
             return false;
         }
     }
@@ -87,7 +89,7 @@ public class MedicationActionService
         // Block if out of stock, but don't show extra confirmation popups otherwise
         if (medication.IsOutOfStock())
         {
-            await ShowAlertAsync(
+            await DialogHelper.ShowAlertAsync(
                 "Out of Stock",
                 $"{medication.Name} is out of stock. Please refill before taking a dose.");
             return false;
@@ -104,7 +106,7 @@ public class MedicationActionService
             var updatedMedication = await _database.GetMedicationByIdAsync(medication.Id);
             if (updatedMedication == null)
             {
-                await ShowAlertAsync("Error", "Failed to reload medication after taking dose.");
+                await DialogHelper.ShowAlertAsync("Error", "Failed to reload medication after taking dose.");
                 return false;
             }
 
@@ -115,20 +117,16 @@ public class MedicationActionService
 
             if (updatedMedication.IsSupplyLow())
             {
-                var page = Application.Current?.Windows[0].Page;
-                if (page != null)
-                {
-                    var shouldRefill = await page.DisplayAlert(
-                        "Low Supply",
-                        $"{updatedMedication.Name} is running low. Only {updatedMedication.CurrentSupply} doses remaining.\n\nTap Refill to add more doses so you don't run out.",
-                        "Refill",
-                        "Remind Me Later");
+                var shouldRefill = await DialogHelper.ShowConfirmationAsync(
+                    "Low Supply",
+                    $"{updatedMedication.Name} is running low. Only {updatedMedication.CurrentSupply} doses remaining.\n\nTap Refill to add more doses so you don't run out.",
+                    "Refill",
+                    "Remind Me Later");
 
-                    if (shouldRefill)
-                    {
-                        // Use the same refresh callback so the caller can update its UI
-                        await RefillAsync(updatedMedication, onRefresh);
-                    }
+                if (shouldRefill == true)
+                {
+                    // Use the same refresh callback so the caller can update its UI
+                    await RefillAsync(updatedMedication, onRefresh);
                 }
             }
 
@@ -136,27 +134,8 @@ public class MedicationActionService
         }
         catch (Exception ex)
         {
-            await ShowAlertAsync("Error", $"Failed to record dose: {ex.Message}");
+            await DialogHelper.ShowAlertAsync("Error", $"Failed to record dose: {ex.Message}");
             return false;
         }
-    }
-
-    private async Task ShowAlertAsync(string title, string message)
-    {
-        var page = Application.Current?.Windows[0].Page;
-        if (page != null)
-        {
-            await page.DisplayAlert(title, message, "OK");
-        }
-    }
-
-    private async Task<bool> ShowConfirmAsync(string title, string message)
-    {
-        var page = Application.Current?.Windows[0].Page;
-        if (page != null)
-        {
-            return await page.DisplayAlert(title, message, "Yes", "Cancel");
-        }
-        return false;
     }
 }

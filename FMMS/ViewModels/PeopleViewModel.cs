@@ -5,6 +5,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using FMMS.Helpers;
 using FMMS.Models;
 using FMMS.Reports;
 using FMMS.Services;
@@ -244,23 +245,22 @@ public class PeopleViewModel : INotifyPropertyChanged
 
             await _reportService.GeneratePeopleSummaryReportAsync(outputPath);
 
-            await Application.Current!.Windows[0].Page!.DisplayAlert(
+            await DialogHelper.ShowAlertAsync(
                 "Report Generated",
-                $"Report saved!\n\nPath: {outputPath}\n\nTotal: {People.Count} people",
-                "OK");
+                $"Report saved!\n\nPath: {outputPath}\n\nTotal: {People.Count} people");
         }
         catch (Exception ex)
         {
-            await Application.Current!.Windows[0].Page!.DisplayAlert(
+            await DialogHelper.ShowAlertAsync(
                 "Error",
-                $"Failed to generate report:\n{ex.Message}",
-                "OK");
+                $"Failed to generate report:\n{ex.Message}");
         }
         finally
         {
             IsBusy = false;
         }
     }
+
     protected bool SetProperty<T>(ref T backingStore, T value, [CallerMemberName] string? propertyName = null)
     {
         if (Equals(backingStore, value))

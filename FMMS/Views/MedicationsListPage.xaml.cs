@@ -18,13 +18,7 @@ public partial class MedicationsListPage : ContentPage
     {
         base.OnAppearing();
 
-        // Load people for the picker
-        if (_viewModel.LoadPeopleCommand.CanExecute(null))
-        {
-            _viewModel.LoadPeopleCommand.Execute(null);
-        }
-
-        // Load medications
+        // Load medications (this will set up "All People" placeholder and show all medications)
         if (_viewModel.LoadCommand.CanExecute(null))
         {
             _viewModel.LoadCommand.Execute(null);

@@ -30,10 +30,12 @@
       <Compile Include="..\FMMS\Models\AsNeededSchedule.cs" Link="Models\AsNeededSchedule.cs" />
       <Compile Include="..\FMMS\Services\DatabaseService.cs" Link="Services\DatabaseService.cs" />
       <Compile Include="..\FMMS\Helpers\ValidationHelper.cs" Link="Helpers\ValidationHelper.cs" />
+      <Compile Include="..\FMMS\Helpers\DialogHelper.cs" Link="Helpers\DialogHelper.cs" />
     </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
+    <PackageReference Include="Microsoft.Maui.Controls" Version="9.0.10" />
   </ItemGroup>
 
 </Project>

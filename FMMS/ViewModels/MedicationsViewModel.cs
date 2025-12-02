@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using FMMS.Helpers;
 using FMMS.Models;
 using FMMS.Services;
 using Microsoft.Maui.Controls;
@@ -24,6 +25,54 @@ public class MedicationsViewModel : INotifyPropertyChanged
     public ObservableCollection<Medication> Medications { get; } = new();
     public ObservableCollection<Person> People { get; } = new();
     public ObservableCollection<ScheduleTimeViewModel> ScheduleTimes { get; } = new();
+
+    // Placeholder person for "Choose a person" option
+    private static readonly Person ChoosePersonPlaceholder = new Person
+    {
+        Id = -1, // Negative ID to indicate it's a placeholder
+        FirstName = "Choose a person",
+        LastName = string.Empty
+    };
+
+    // Placeholder person for "All People" filter option
+    private static readonly Person AllPeoplePlaceholder = new Person
+    {
+        Id = -2, // Different negative ID for "All People"
+        FirstName = "All People",
+        LastName = string.Empty
+    };
+
+    /// <summary>
+    /// Ensures the placeholder person is the first item in the People collection.
+    /// Used for the MedicationsPage picker.
+    /// </summary>
+    private void EnsureChoosePersonPlaceholder()
+    {
+        if (People.Count == 0 || People[0].Id != -1)
+        {
+            People.Insert(0, ChoosePersonPlaceholder);
+        }
+    }
+
+    /// <summary>
+    /// Ensures the "All People" placeholder is the first item in the People collection.
+    /// Used for the MedicationsListPage filter picker.
+    /// </summary>
+    private void EnsureAllPeoplePlaceholder()
+    {
+        // Remove "Choose a person" if it exists
+        var choosePerson = People.FirstOrDefault(p => p.Id == -1);
+        if (choosePerson != null)
+        {
+            People.Remove(choosePerson);
+        }
+
+        // Add "All People" if it doesn't exist
+        if (People.Count == 0 || People[0].Id != -2)
+        {
+            People.Insert(0, AllPeoplePlaceholder);
+        }
+    }
 
     private Medication? _selectedMedication;
     public Medication? SelectedMedication
@@ -51,8 +100,9 @@ public class MedicationsViewModel : INotifyPropertyChanged
                     IsActive = value.IsActive;
                     Notes = value.Notes;
 
-                    // Set the selected person
-                    SelectedPerson = People.FirstOrDefault(p => p.Id == value.PersonId);
+                    // Set the selected person (or placeholder if not found)
+                    var foundPerson = People.FirstOrDefault(p => p.Id == value.PersonId);
+                    SelectedPerson = foundPerson ?? ChoosePersonPlaceholder;
                     
                     // Load schedule times
                     _ = LoadScheduleTimesAsync(value.Id);
@@ -61,10 +111,14 @@ public class MedicationsViewModel : INotifyPropertyChanged
                 {
                     // Clear schedule times when no medication is selected
                     ScheduleTimes.Clear();
+                    // Reset to placeholder when no medication is selected
+                    if (People.Contains(ChoosePersonPlaceholder))
+                    {
+                        SelectedPerson = ChoosePersonPlaceholder;
+                    }
                 }
 
                 OnPropertyChanged(nameof(SaveButtonText));
-                ((Command)SaveMedicationCommand).ChangeCanExecute();
             }
         }
     }
@@ -77,13 +131,35 @@ public class MedicationsViewModel : INotifyPropertyChanged
         {
             if (SetProperty(ref _selectedPerson, value))
             {
-                ((Command)SaveMedicationCommand).ChangeCanExecute();
                 if (value != null && !IsBusy)
                 {
-                    _ = LoadMedicationsForPersonAsync(value.Id);
+                    if (value.Id == -2)
+                    {
+                        // "All People" placeholder selected - reload all medications
+                        _ = LoadAsync();
+                    }
+                    else if (value.Id > 0)
+                    {
+                        // Real person selected - load medications for that person
+                        _ = LoadMedicationsForPersonAsync(value.Id);
+                    }
+                    // If value.Id == -1 ("Choose a person"), do nothing (used in MedicationsPage)
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Gets the actual selected person (excluding placeholders) for business logic.
+    /// Returns null if placeholder is selected or no person is selected.
+    /// </summary>
+    public Person? GetActualSelectedPerson()
+    {
+        if (_selectedPerson == null || _selectedPerson.Id < 0)
+        {
+            return null;
+        }
+        return _selectedPerson;
     }
 
     public string SaveButtonText => SelectedMedication == null ? "Add" : "Update";
@@ -93,26 +169,14 @@ public class MedicationsViewModel : INotifyPropertyChanged
     public string Name
     {
         get => _name;
-        set
-        {
-            if (SetProperty(ref _name, value))
-            {
-                ((Command)SaveMedicationCommand).ChangeCanExecute();
-            }
-        }
+        set => SetProperty(ref _name, value);
     }
 
     private string _dosage = string.Empty;
     public string Dosage
     {
         get => _dosage;
-        set
-        {
-            if (SetProperty(ref _dosage, value))
-            {
-                ((Command)SaveMedicationCommand).ChangeCanExecute();
-            }
-        }
+        set => SetProperty(ref _dosage, value);
     }
 
     private string _instructions = string.Empty;
@@ -248,7 +312,7 @@ public class MedicationsViewModel : INotifyPropertyChanged
 
         LoadCommand = new Command(async () => await LoadAsync(), () => !IsBusy);
         LoadPeopleCommand = new Command(async () => await LoadPeopleAsync(), () => !IsBusy);
-        SaveMedicationCommand = new Command(async () => await SaveMedicationAsync(), CanSaveMedication);
+        SaveMedicationCommand = new Command(async () => await SaveMedicationAsync());
         SearchCommand = new Command(async () => await SearchAsync(), () => !IsBusy);
         DeleteCommand = new Command<Medication>(async m => await DeleteMedicationAsync(m));
         TakeDoseCommand = new Command<Medication>(async m => await TakeDoseAsync(m));
@@ -260,11 +324,6 @@ public class MedicationsViewModel : INotifyPropertyChanged
         RemoveScheduleTimeCommand = new Command<ScheduleTimeViewModel>(time => RemoveScheduleTime(time));
     }
 
-    private bool CanSaveMedication()
-        => !string.IsNullOrWhiteSpace(Name) &&
-           !string.IsNullOrWhiteSpace(Dosage) &&
-           SelectedPerson != null;
-
     private async Task LoadAsync()
     {
         try
@@ -275,8 +334,18 @@ public class MedicationsViewModel : INotifyPropertyChanged
             var medications = await _database.GetMedicationsAsync();
             
             // Load people if not already loaded to map Person navigation property
-            if (People.Count == 0)
+            if (People.Count == 0 || !People.Any(p => p.Id > 0))
             {
+                // Clear any existing placeholders
+                var placeholders = People.Where(p => p.Id < 0).ToList();
+                foreach (var placeholder in placeholders)
+                {
+                    People.Remove(placeholder);
+                }
+
+                // Add "All People" placeholder for filter
+                EnsureAllPeoplePlaceholder();
+
                 var people = await _database.GetPeopleAsync();
                 foreach (var person in people)
                 {
@@ -290,6 +359,12 @@ public class MedicationsViewModel : INotifyPropertyChanged
                 medication.Person = People.FirstOrDefault(p => p.Id == medication.PersonId);
                 await LoadScheduleTimesForMedication(medication);
                 Medications.Add(medication);
+            }
+
+            // Set default to "All People" placeholder if no person is selected (for MedicationsListPage)
+            if (SelectedPerson == null || (SelectedPerson.Id != -2 && SelectedPerson.Id <= 0))
+            {
+                SelectedPerson = AllPeoplePlaceholder;
             }
         }
         finally
@@ -305,10 +380,19 @@ public class MedicationsViewModel : INotifyPropertyChanged
             IsBusy = true;
             People.Clear();
 
+            // Add placeholder as first option (for MedicationsPage - "Choose a person")
+            People.Add(ChoosePersonPlaceholder);
+
             var people = await _database.GetPeopleAsync();
             foreach (var person in people)
             {
                 People.Add(person);
+            }
+
+            // If no person is currently selected, default to the placeholder
+            if (SelectedPerson == null || SelectedPerson.Id < 0)
+            {
+                SelectedPerson = ChoosePersonPlaceholder;
             }
         }
         finally
@@ -327,8 +411,18 @@ public class MedicationsViewModel : INotifyPropertyChanged
             var medications = await _database.GetMedicationsAsync(personId);
             
             // Load people if not already loaded to map Person navigation property
-            if (People.Count == 0)
+            if (People.Count == 0 || !People.Any(p => p.Id > 0))
             {
+                // Clear any existing placeholders
+                var placeholders = People.Where(p => p.Id < 0).ToList();
+                foreach (var placeholder in placeholders)
+                {
+                    People.Remove(placeholder);
+                }
+
+                // Add "All People" placeholder for filter
+                EnsureAllPeoplePlaceholder();
+
                 var people = await _database.GetPeopleAsync();
                 foreach (var person in people)
                 {
@@ -357,12 +451,23 @@ public class MedicationsViewModel : INotifyPropertyChanged
             IsBusy = true;
             Medications.Clear();
 
-            var personId = SelectedPerson?.Id;
+            var actualPerson = GetActualSelectedPerson();
+            var personId = actualPerson?.Id;
             var results = await _database.SearchMedicationsAsync(SearchText, personId);
             
             // Load people if not already loaded to map Person navigation property
-            if (People.Count == 0)
+            if (People.Count == 0 || !People.Any(p => p.Id > 0))
             {
+                // Clear any existing placeholders
+                var placeholders = People.Where(p => p.Id < 0).ToList();
+                foreach (var placeholder in placeholders)
+                {
+                    People.Remove(placeholder);
+                }
+
+                // Add "All People" placeholder for filter
+                EnsureAllPeoplePlaceholder();
+
                 var people = await _database.GetPeopleAsync();
                 foreach (var person in people)
                 {
@@ -389,27 +494,30 @@ public class MedicationsViewModel : INotifyPropertyChanged
     // ============================================================
     private async Task SaveMedicationAsync()
     {
-        // Check basic requirements first
-        if (!CanSaveMedication() || SelectedPerson == null)
+        // Check each requirement individually with specific error messages
+        var actualPerson = GetActualSelectedPerson();
+        
+        if (actualPerson == null)
         {
-            await Application.Current!.Windows[0].Page!.DisplayAlert(
-                "Missing Information",
-                "Please ensure:\n" +
-                "• A person is selected\n" +
-                "• Medication name is entered\n" +
-                "• Dosage is entered",
-                "OK");
+            await DialogHelper.ShowAlertAsync(
+                "Person Required",
+                "Please select a person from the dropdown list.");
             return;
         }
 
-        // Check if SelectedPerson has a valid ID
-        if (SelectedPerson.Id <= 0)
+        if (string.IsNullOrWhiteSpace(Name))
         {
-            await Application.Current!.Windows[0].Page!.DisplayAlert(
-                "Error",
-                $"The selected person has an invalid ID ({SelectedPerson.Id}). " +
-                "Please go to the People tab and add a person first.",
-                "OK");
+            await DialogHelper.ShowAlertAsync(
+                "Medication Name Required",
+                "Please enter a medication name.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(Dosage))
+        {
+            await DialogHelper.ShowAlertAsync(
+                "Dosage Required",
+                "Please enter the medication dosage (e.g., 10mg, 5ml).");
             return;
         }
 
@@ -420,7 +528,7 @@ public class MedicationsViewModel : INotifyPropertyChanged
                 // Create new medication
                 var medication = new Medication
                 {
-                    PersonId = SelectedPerson.Id,
+                    PersonId = actualPerson.Id,
                     Name = Name,
                     Dosage = Dosage,
                     Instructions = Instructions,
@@ -468,10 +576,9 @@ public class MedicationsViewModel : INotifyPropertyChanged
                     if (medication.LowSupplyThreshold < 0)
                         errors.Add($"• Low supply threshold is negative ({medication.LowSupplyThreshold})");
 
-                    await Application.Current!.Windows[0].Page!.DisplayAlert(
+                    await DialogHelper.ShowAlertAsync(
                         "Validation Failed",
-                        "The medication has the following errors:\n\n" + string.Join("\n", errors),
-                        "OK");
+                        "The medication has the following errors:\n\n" + string.Join("\n", errors));
                     return;
                 }
 
@@ -489,7 +596,7 @@ public class MedicationsViewModel : INotifyPropertyChanged
             else
             {
                 // Update existing medication
-                SelectedMedication.PersonId = SelectedPerson.Id;
+                SelectedMedication.PersonId = actualPerson.Id;
                 SelectedMedication.Name = Name;
                 SelectedMedication.Dosage = Dosage;
                 SelectedMedication.Instructions = Instructions;
@@ -508,10 +615,34 @@ public class MedicationsViewModel : INotifyPropertyChanged
                 // Validate before saving
                 if (!SelectedMedication.Validate())
                 {
-                    await Application.Current!.Windows[0].Page!.DisplayAlert(
+                    // Build detailed error message
+                    var errors = new System.Collections.Generic.List<string>();
+
+                    if (SelectedMedication.PersonId <= 0)
+                        errors.Add($"• PersonId is invalid ({SelectedMedication.PersonId})");
+                    if (string.IsNullOrWhiteSpace(SelectedMedication.Name))
+                        errors.Add("• Name is empty");
+                    if (string.IsNullOrWhiteSpace(SelectedMedication.Dosage))
+                        errors.Add("• Dosage is empty");
+                    if (SelectedMedication.PrescriptionDate.HasValue && SelectedMedication.PrescriptionDate.Value > DateTime.UtcNow)
+                        errors.Add("• Prescription date is in the future");
+                    if (SelectedMedication.PrescriptionDate.HasValue && SelectedMedication.ExpirationDate.HasValue &&
+                        SelectedMedication.ExpirationDate.Value < SelectedMedication.PrescriptionDate.Value)
+                        errors.Add("• Expiration date is before prescription date");
+                    if (SelectedMedication.RefillsRemaining > SelectedMedication.RefillsAuthorized)
+                        errors.Add($"• Refills remaining ({SelectedMedication.RefillsRemaining}) exceeds authorized ({SelectedMedication.RefillsAuthorized})");
+                    if (SelectedMedication.CurrentSupply < 0)
+                        errors.Add($"• Current supply is negative ({SelectedMedication.CurrentSupply})");
+                    if (SelectedMedication.RefillsAuthorized < 0)
+                        errors.Add($"• Refills authorized is negative ({SelectedMedication.RefillsAuthorized})");
+                    if (SelectedMedication.RefillsRemaining < 0)
+                        errors.Add($"• Refills remaining is negative ({SelectedMedication.RefillsRemaining})");
+                    if (SelectedMedication.LowSupplyThreshold < 0)
+                        errors.Add($"• Low supply threshold is negative ({SelectedMedication.LowSupplyThreshold})");
+
+                    await DialogHelper.ShowAlertAsync(
                         "Validation Failed",
-                        "The medication failed validation. Please check all fields.",
-                        "OK");
+                        "The medication has the following errors:\n\n" + string.Join("\n", errors));
                     return;
                 }
 
@@ -535,20 +666,18 @@ public class MedicationsViewModel : INotifyPropertyChanged
             await LoadAsync();
 
             // Success message
-            await Application.Current!.Windows[0].Page!.DisplayAlert(
+            await DialogHelper.ShowAlertAsync(
                 "Success",
-                "Medication saved successfully!",
-                "OK");
+                "Medication saved successfully!");
             
             // Fire event to notify that medication was saved
             MedicationSaved?.Invoke(this, EventArgs.Empty);
         }
         catch (Exception ex)
         {
-            await Application.Current!.Windows[0].Page!.DisplayAlert(
+            await DialogHelper.ShowAlertAsync(
                 "Error",
-                $"Failed to save medication:\n\n{ex.Message}\n\nDetails: {ex.InnerException?.Message ?? "None"}",
-                "OK");
+                $"Failed to save medication:\n\n{ex.Message}\n\nDetails: {ex.InnerException?.Message ?? "None"}");
         }
     }
 
@@ -572,10 +701,9 @@ public class MedicationsViewModel : INotifyPropertyChanged
         }
         catch (Exception ex)
         {
-            await Application.Current!.Windows[0].Page!.DisplayAlert(
+            await DialogHelper.ShowAlertAsync(
                 "Error",
-                $"Failed to delete medication: {ex.Message}",
-                "OK");
+                $"Failed to delete medication: {ex.Message}");
         }
     }
 
@@ -664,8 +792,18 @@ public class MedicationsViewModel : INotifyPropertyChanged
             var lowSupply = await _database.GetLowSupplyMedicationsAsync(personId);
             
             // Load people if not already loaded to map Person navigation property
-            if (People.Count == 0)
+            if (People.Count == 0 || !People.Any(p => p.Id > 0))
             {
+                // Clear any existing placeholders
+                var placeholders = People.Where(p => p.Id < 0).ToList();
+                foreach (var placeholder in placeholders)
+                {
+                    People.Remove(placeholder);
+                }
+
+                // Add "All People" placeholder for filter
+                EnsureAllPeoplePlaceholder();
+
                 var people = await _database.GetPeopleAsync();
                 foreach (var person in people)
                 {
@@ -698,8 +836,18 @@ public class MedicationsViewModel : INotifyPropertyChanged
             var expired = await _database.GetExpiredMedicationsAsync(personId);
             
             // Load people if not already loaded to map Person navigation property
-            if (People.Count == 0)
+            if (People.Count == 0 || !People.Any(p => p.Id > 0))
             {
+                // Clear any existing placeholders
+                var placeholders = People.Where(p => p.Id < 0).ToList();
+                foreach (var placeholder in placeholders)
+                {
+                    People.Remove(placeholder);
+                }
+
+                // Add "All People" placeholder for filter
+                EnsureAllPeoplePlaceholder();
+
                 var people = await _database.GetPeopleAsync();
                 foreach (var person in people)
                 {
@@ -874,6 +1022,12 @@ public class MedicationsViewModel : INotifyPropertyChanged
         IsActive = true;
         Notes = null;
         SelectedMedication = null;
+        // Reset to placeholder so it shows "Choose a person" in the dropdown
+        EnsureChoosePersonPlaceholder();
+        if (People.Contains(ChoosePersonPlaceholder))
+        {
+            SelectedPerson = ChoosePersonPlaceholder;
+        }
         ScheduleTimes.Clear();
     }
 

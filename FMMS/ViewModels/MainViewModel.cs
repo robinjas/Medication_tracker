@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using FMMS.Helpers;
 using FMMS.Models;
 using FMMS.Reports;
 using FMMS.Services;
@@ -288,25 +289,15 @@ public class MainViewModel : INotifyPropertyChanged
 
             await _reportService.GenerateMedicationSummaryReportAsync(outputPath);
 
-            var page = Application.Current!.Windows[0].Page;
-            if (page != null)
-            {
-                await page.DisplayAlert(
-                    "Report Generated",
-                    $"Summary report saved!\n\nPath: {outputPath}",
-                    "OK");
-            }
+            await DialogHelper.ShowAlertAsync(
+                "Report Generated",
+                $"Summary report saved!\n\nPath: {outputPath}");
         }
         catch (Exception ex)
         {
-            var page = Application.Current!.Windows[0].Page;
-            if (page != null)
-            {
-                await page.DisplayAlert(
-                    "Error",
-                    $"Failed to generate report:\n{ex.Message}",
-                    "OK");
-            }
+            await DialogHelper.ShowAlertAsync(
+                "Error",
+                $"Failed to generate report:\n{ex.Message}");
         }
         finally
         {
