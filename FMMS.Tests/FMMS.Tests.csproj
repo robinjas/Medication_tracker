@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+    <ItemGroup>
+      <!-- Link to models, services, and helpers from FMMS project for testing -->
+      <Compile Include="..\FMMS\Models\BaseEntity.cs" Link="Models\BaseEntity.cs" />
+      <Compile Include="..\FMMS\Models\Person.cs" Link="Models\Person.cs" />
+      <Compile Include="..\FMMS\Models\Medication.cs" Link="Models\Medication.cs" />
+      <Compile Include="..\FMMS\Models\ScheduleRule.cs" Link="Models\ScheduleRule.cs" />
+      <Compile Include="..\FMMS\Models\DailySchedule.cs" Link="Models\DailySchedule.cs" />
+      <Compile Include="..\FMMS\Models\IntervalSchedule.cs" Link="Models\IntervalSchedule.cs" />
+      <Compile Include="..\FMMS\Models\WeeklySchedule.cs" Link="Models\WeeklySchedule.cs" />
+      <Compile Include="..\FMMS\Models\AsNeededSchedule.cs" Link="Models\AsNeededSchedule.cs" />
+      <Compile Include="..\FMMS\Services\DatabaseService.cs" Link="Services\DatabaseService.cs" />
+      <Compile Include="..\FMMS\Helpers\ValidationHelper.cs" Link="Helpers\ValidationHelper.cs" />
+      <Compile Include="..\FMMS\Helpers\DialogHelper.cs" Link="Helpers\DialogHelper.cs" />
+    </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
+    <PackageReference Include="Microsoft.Maui.Controls" Version="9.0.10" />
+  </ItemGroup>
+
+</Project>

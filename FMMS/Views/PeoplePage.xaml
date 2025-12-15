@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="FMMS.Views.PeoplePage"
+             x:Name="RootPage"
+             Title="Family Members">
+
+    <ContentPage.Content>
+        <VerticalStackLayout Padding="16" Spacing="12">
+
+            <!-- Header -->
+            <Label Text="Family Members"
+                   FontSize="24"
+                   HorizontalOptions="Center" />
+
+            <!-- Add / Update person row using Grid -->
+            <Grid ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Entry Grid.Column="0"
+                       Placeholder="First name"
+                       Text="{Binding FirstName}" />
+
+                <Entry Grid.Column="1"
+                       Placeholder="Last name"
+                       Text="{Binding LastName}" />
+
+                <DatePicker Grid.Column="2"
+                            Date="{Binding DateOfBirthDisplay, Mode=TwoWay}"
+                            MaximumDate="{Binding MaximumDate}"
+                            Format="MMM dd, yyyy"
+                            MinimumDate="01/01/1900" />
+
+                <Button Grid.Column="3"
+                        Text="{Binding SaveButtonText}"
+                        Command="{Binding AddPersonCommand}" />
+            </Grid>
+
+            <!-- Search row using Grid -->
+            <Grid ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Entry Grid.Column="0"
+                       Placeholder="Search by name"
+                       Text="{Binding SearchText}" />
+
+                <Button Grid.Column="1"
+                        Text="Search"
+                        Command="{Binding SearchCommand}" />
+            </Grid>
+
+            <!-- People list -->
+            <CollectionView ItemsSource="{Binding People}"
+                            SelectionMode="Single"
+                            SelectedItem="{Binding SelectedPerson}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Padding="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                <!-- Name -->
+                                <Label Text="{Binding}"
+                                       FontSize="18"
+                                       FontAttributes="Bold" />
+                                <!-- Date of Birth -->
+                                <Label Text="{Binding DateOfBirth, StringFormat='DOB: {0:MMMM dd, yyyy}'}"
+                                       FontSize="14"
+                                       TextColor="Gray">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" 
+                                                     Binding="{Binding DateOfBirth}" 
+                                                     Value="{x:Null}">
+                                            <Setter Property="Text" Value="" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </VerticalStackLayout>
+
+                            <Button Grid.Column="1"
+                                    Text="Delete"
+                                    Command="{Binding BindingContext.DeleteCommand, Source={x:Reference RootPage}}"
+                                    CommandParameter="{Binding .}" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ContentPage.Content>
+</ContentPage>

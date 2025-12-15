@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:helpers="clr-namespace:FMMS.Helpers"
+             x:Class="FMMS.Views.MainPage"
+             x:Name="RootPage"
+             Title="Dashboard">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <!-- Value Converters -->
+            <helpers:CountToVisibilityConverter x:Key="CountToVisibilityConverter" />
+            <helpers:CountToBoolInverseConverter x:Key="CountToBoolInverseConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <ContentPage.Content>
+        <ScrollView>
+            <VerticalStackLayout Padding="16" Spacing="16">
+                
+                <!-- Welcome Header -->
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Family Medication Management"
+                           FontSize="28"
+                           FontAttributes="Bold"
+                           HorizontalOptions="Center" />
+                    <Label x:Name="DateLabel"
+                           FontSize="14"
+                           TextColor="Gray"
+                           HorizontalOptions="Center" />
+                </VerticalStackLayout>
+
+                <!-- Statistics Cards -->
+                <Label Text="Statistics" FontSize="20" FontAttributes="Bold" Margin="0,8,0,0" />
+                
+                <Grid ColumnSpacing="8" RowSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Total Medications Card -->
+                    <Border Grid.Row="0" Grid.Column="0" 
+                           BackgroundColor="#28A745" 
+                           Padding="16" 
+                           StrokeShape="RoundRectangle 8">
+                        <Border.Content>
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="Total Medications" 
+                                       FontSize="12" 
+                                       TextColor="White"
+                                       Opacity="0.9" />
+                                <Label Text="{Binding TotalMedications}" 
+                                       FontSize="32" 
+                                       FontAttributes="Bold"
+                                       TextColor="White" />
+                            </VerticalStackLayout>
+                        </Border.Content>
+                    </Border>
+
+                    <!-- Active Medications Card -->
+                    <Border Grid.Row="0" Grid.Column="1" 
+                           BackgroundColor="#17A2B8" 
+                           Padding="16" 
+                           StrokeShape="RoundRectangle 8">
+                        <Border.Content>
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="Active" 
+                                       FontSize="12" 
+                                       TextColor="White"
+                                       Opacity="0.9" />
+                                <Label Text="{Binding ActiveMedications}" 
+                                       FontSize="32" 
+                                       FontAttributes="Bold"
+                                       TextColor="White" />
+                            </VerticalStackLayout>
+                        </Border.Content>
+                    </Border>
+
+                    <!-- Low Supply Card -->
+                    <Border Grid.Row="1" Grid.Column="0" 
+                           BackgroundColor="#FFC107" 
+                           Padding="16" 
+                           StrokeShape="RoundRectangle 8">
+                        <Border.Content>
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="Low Supply" 
+                                       FontSize="12" 
+                                       TextColor="Black"
+                                       Opacity="0.9" />
+                                <Label Text="{Binding LowSupplyCount}" 
+                                       FontSize="32" 
+                                       FontAttributes="Bold"
+                                       TextColor="Black" />
+                            </VerticalStackLayout>
+                        </Border.Content>
+                    </Border>
+
+                    <!-- Upcoming Refills Card -->
+                    <Border Grid.Row="1" Grid.Column="1" 
+                           BackgroundColor="#FD7E14" 
+                           Padding="16" 
+                           StrokeShape="RoundRectangle 8">
+                        <Border.Content>
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="Refills Due" 
+                                       FontSize="12" 
+                                       TextColor="White"
+                                       Opacity="0.9" />
+                                <Label Text="{Binding UpcomingRefills}" 
+                                       FontSize="32" 
+                                       FontAttributes="Bold"
+                                       TextColor="White" />
+                            </VerticalStackLayout>
+                        </Border.Content>
+                    </Border>
+                </Grid>
+
+                <!-- Low Supply Medications -->
+                <VerticalStackLayout Spacing="8" Margin="0,8,0,0">
+                    <HorizontalStackLayout>
+                        <Label Text="Low Supply Medications" 
+                               FontSize="18" 
+                               FontAttributes="Bold"
+                               VerticalOptions="Center" />
+                        <Label Text="{Binding LowSupplyCount, StringFormat='({0})'}" 
+                               FontSize="18" 
+                               TextColor="Red"
+                               FontAttributes="Bold"
+                               VerticalOptions="Center"
+                               Margin="8,0,0,0" />
+                    </HorizontalStackLayout>
+
+                    <CollectionView ItemsSource="{Binding LowSupplyMedications}"
+                                    IsVisible="{Binding LowSupplyMedications.Count, Converter={StaticResource CountToVisibilityConverter}}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Border StrokeThickness="1" 
+                                       Stroke="#FFC107" 
+                                       Padding="12" 
+                                       Margin="0,4" 
+                                       StrokeShape="RoundRectangle 8"
+                                       BackgroundColor="#FFF9E6">
+                                    <Border.Content>
+                                        <Grid ColumnSpacing="8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                                <Label Text="{Binding Name}" 
+                                                       FontSize="16" 
+                                                       FontAttributes="Bold" />
+                                                <Label Text="{Binding Dosage}" 
+                                                       FontSize="14" 
+                                                       TextColor="Gray" />
+                                                <Label Text="{Binding CurrentSupply, StringFormat='Supply: {0} doses'}" 
+                                                       FontSize="12" 
+                                                       TextColor="Red"
+                                                       FontAttributes="Bold" />
+                                            </VerticalStackLayout>
+
+                                            <Button Grid.Column="1"
+                                                    Text="Refill"
+                                                    Command="{Binding BindingContext.RefillCommand, Source={x:Reference RootPage}}"
+                                                    CommandParameter="{Binding .}"
+                                                    BackgroundColor="#17A2B8"
+                                                    TextColor="White"
+                                                    FontSize="12"
+                                                    Padding="12,6"
+                                                    VerticalOptions="Center" />
+                                        </Grid>
+                                    </Border.Content>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <Label Text="No low supply medications" 
+                           IsVisible="{Binding LowSupplyMedications.Count, Converter={StaticResource CountToBoolInverseConverter}}"
+                           FontSize="14" 
+                           TextColor="Gray"
+                           HorizontalOptions="Center"
+                           Margin="0,8" />
+                </VerticalStackLayout>
+
+                <!-- Upcoming Refills -->
+                <VerticalStackLayout Spacing="8" Margin="0,8,0,0">
+                    <HorizontalStackLayout>
+                        <Label Text="Upcoming Refills" 
+                               FontSize="18" 
+                               FontAttributes="Bold" />
+                        <Label Text="{Binding UpcomingRefills, StringFormat='({0})'}" 
+                               FontSize="18" 
+                               TextColor="Orange"
+                               FontAttributes="Bold"
+                               Margin="8,0,0,0" />
+                    </HorizontalStackLayout>
+
+                    <CollectionView ItemsSource="{Binding RefillNeededMedications}"
+                                    IsVisible="{Binding RefillNeededMedications.Count, Converter={StaticResource CountToVisibilityConverter}}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Border StrokeThickness="1" 
+                                       Stroke="#FD7E14" 
+                                       Padding="12" 
+                                       Margin="0,4" 
+                                       StrokeShape="RoundRectangle 8"
+                                       BackgroundColor="#FFF4E6">
+                                    <Border.Content>
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label Text="{Binding Name}" 
+                                                   FontSize="16" 
+                                                   FontAttributes="Bold" />
+                                            <Label Text="{Binding Dosage}" 
+                                                   FontSize="14" 
+                                                   TextColor="Gray" />
+                                            <Label Text="{Binding CurrentSupply, StringFormat='Supply: {0} doses remaining'}" 
+                                                   FontSize="12" 
+                                                   TextColor="Orange"
+                                                   FontAttributes="Bold" />
+                                            <Label Text="{Binding RefillsRemaining, StringFormat='Refills Available: {0}'}" 
+                                                   FontSize="12" 
+                                                   TextColor="DarkGray" />
+                                        </VerticalStackLayout>
+                                    </Border.Content>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <Label Text="No refills needed" 
+                           IsVisible="{Binding RefillNeededMedications.Count, Converter={StaticResource CountToBoolInverseConverter}}"
+                           FontSize="14" 
+                           TextColor="Gray"
+                           HorizontalOptions="Center"
+                           Margin="0,8" />
+                </VerticalStackLayout>
+
+                <!-- Refresh Button -->
+                <Button Text="Refresh"
+                        Command="{Binding RefreshCommand}"
+                        BackgroundColor="#6C757D"
+                        TextColor="White"
+                        CornerRadius="8" />
+
+                <!-- Loading Indicator -->
+                <ActivityIndicator IsRunning="{Binding IsBusy}"
+                                   IsVisible="{Binding IsBusy}"
+                                   Color="#4A90E2"
+                                   Margin="0,16" />
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </ContentPage.Content>
+</ContentPage>
+
