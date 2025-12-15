@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -726,6 +726,12 @@ public class MedicationsViewModel : INotifyPropertyChanged
             var updatedMedication = await _database.GetMedicationByIdAsync(medicationId);
             if (updatedMedication != null)
             {
+                // Map Person navigation property from People collection
+                updatedMedication.Person = People.FirstOrDefault(p => p.Id == updatedMedication.PersonId);
+                
+                // Load schedule times for display (same pattern as LoadMedicationsAsync)
+                await LoadScheduleTimesForMedication(updatedMedication);
+                
                 // Find the medication in the collection by ID (more reliable than reference)
                 var existingMedication = Medications.FirstOrDefault(m => m.Id == medicationId);
                 if (existingMedication != null)

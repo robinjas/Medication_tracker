@@ -187,64 +187,6 @@
                            Margin="0,8" />
                 </VerticalStackLayout>
 
-                <!-- Recent Medications -->
-                <VerticalStackLayout Spacing="8" Margin="0,8,0,0">
-                    <Label Text="Recent Medications" 
-                           FontSize="18" 
-                           FontAttributes="Bold" />
-
-                    <CollectionView ItemsSource="{Binding RecentMedications}"
-                                    IsVisible="{Binding RecentMedications.Count, Converter={StaticResource CountToVisibilityConverter}}">
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate>
-                                <Border StrokeThickness="1" 
-                                       Stroke="LightGray" 
-                                       Padding="12" 
-                                       Margin="0,4" 
-                                       StrokeShape="RoundRectangle 8">
-                                    <Border.Content>
-                                        <Grid ColumnSpacing="8">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
-
-                                            <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                                <Label Text="{Binding Name}" 
-                                                       FontSize="16" 
-                                                       FontAttributes="Bold" />
-                                                <Label Text="{Binding Dosage}" 
-                                                       FontSize="14" 
-                                                       TextColor="Gray" />
-                                                <Label Text="{Binding CurrentSupply, StringFormat='Supply: {0} doses'}" 
-                                                       FontSize="12" 
-                                                       TextColor="DarkGray" />
-                                            </VerticalStackLayout>
-
-                                            <Button Grid.Column="1"
-                                                    Text="Take Dose"
-                                                    Command="{Binding BindingContext.TakeDoseCommand, Source={x:Reference RootPage}}"
-                                                    CommandParameter="{Binding .}"
-                                                    BackgroundColor="#28A745"
-                                                    TextColor="White"
-                                                    FontSize="12"
-                                                    Padding="12,6"
-                                                    VerticalOptions="Center" />
-                                        </Grid>
-                                    </Border.Content>
-                                </Border>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-
-                    <Label Text="No medications yet" 
-                           IsVisible="{Binding RecentMedications.Count, Converter={StaticResource CountToBoolInverseConverter}}"
-                           FontSize="14" 
-                           TextColor="Gray"
-                           HorizontalOptions="Center"
-                           Margin="0,8" />
-                </VerticalStackLayout>
-
                 <!-- Upcoming Refills -->
                 <VerticalStackLayout Spacing="8" Margin="0,8,0,0">
                     <HorizontalStackLayout>
