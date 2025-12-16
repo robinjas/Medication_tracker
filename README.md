@@ -55,6 +55,24 @@ dotnet run
 
 Or open the solution in Visual Studio and run from the IDE.
 
+### Build Android APK
+
+```bash
+dotnet publish FMMS/FMMS.csproj -f net9.0-android -c Release
+```
+
+The signed APK will be built at:
+```
+FMMS/bin/Release/net9.0-android/com.companyname.fmms-Signed.apk
+```
+
+For distribution, copy the APK to the docs folder:
+```bash
+copy FMMS\bin\Release\net9.0-android\com.companyname.fmms-Signed.apk docs\FMMS.apk
+```
+
+The landing page and APK are available at: https://robinjas.github.io/Medication_tracker/
+
 ### Run Unit Tests
 
 ```bash
