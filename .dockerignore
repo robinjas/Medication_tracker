@@ -1,0 +1,28 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.vs
+.vscode
+.idea
+*.user
+
+# Build outputs (not needed in container)
+FMMS/bin
+FMMS/obj
+FMMS.Tests/bin
+FMMS.Tests/obj
+
+# Documentation (keep only docs folder)
+*.md
+!docs/*.md
+
+# Test files
+*.Tests
+
+# Misc
+*.log
+Thumbs.db
+.DS_Store
+

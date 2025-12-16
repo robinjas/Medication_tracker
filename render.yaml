@@ -1,0 +1,16 @@
+# Render.com Blueprint Specification
+# This file automates deployment to Render cloud platform
+# Documentation: https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: fmms-landing-page
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: 80
+
