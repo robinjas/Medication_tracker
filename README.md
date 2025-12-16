@@ -73,6 +73,18 @@ copy FMMS\bin\Release\net9.0-android\com.companyname.fmms-Signed.apk docs\FMMS.a
 
 The landing page and APK are available at: https://robinjas.github.io/Medication_tracker/
 
+### Deploy to GitHub Pages
+
+1. Push the `docs/` folder (containing `index.html` and `FMMS.apk`) to your GitHub repository
+2. Go to your repository on GitHub
+3. Click **Settings** → **Pages** (under "Code and automation")
+4. Under **Build and deployment**:
+   - Source: **Deploy from a branch**
+   - Branch: Select your branch (e.g., `main`) and folder `/docs`
+5. Click **Save**
+6. Wait 2-5 minutes for GitHub to deploy
+7. Your site will be live at: `https://<username>.github.io/<repository>/`
+
 ### Run Unit Tests
 
 ```bash
