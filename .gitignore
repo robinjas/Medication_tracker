@@ -338,6 +338,8 @@ MigrationBackup/
 
 # MAUI
 *.apk
+# But allow APK in docs folder for distribution
+!docs/*.apk
 *.aab
 *.ipa
 *.app
